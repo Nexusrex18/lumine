@@ -65,7 +65,7 @@ The program will prompt you to select the services you want to configure. Follow
 - The tool interacts with AWS services using the AWS SDK and Terraform to generate configuration files.
 - CI/CD pipelines are automatically set up using GitHub Actions by creating `.github` workflow files.
 - Monitoring is configured using Prometheus for infrastructure health tracking.
-- Cost estimation can be done using AWS pricing APIs.
+- Cost estimation can be done using AWS pricing APIs..
 
 ## AWS Regions Supported
 
