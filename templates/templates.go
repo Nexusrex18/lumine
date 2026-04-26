@@ -17,30 +17,35 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/{{ .RepoURL }}'
+                git '{{ .RepoURL }}'
             }
         }
         stage('Build') {
             steps {
-                script {
-                    if (isGoProject) {
-                        sh 'go build ./...'
-                    } else {
-                        sh 'npm install'
-                    }
-                }
+                {{- if .IsGoProject }}
+                sh 'go mod tidy && go build ./...'
+                {{- else }}
+                sh 'npm ci && npm run build'
+                {{- end }}
             }
         }
         stage('Test') {
             steps {
-                script {
-                    if (isGoProject) {
-                        sh 'go test ./...'
-                    } else {
-                        sh 'npm test'
-                    }
-                }
+                {{- if .IsGoProject }}
+                sh 'go test -v ./...'
+                {{- else }}
+                sh 'npm test'
+                {{- end }}
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed. Check the console output.'
         }
     }
 }
@@ -218,7 +223,7 @@ func GenerateJenkinsfile(repoURL string, isGoProject bool) error {
 	// Data to pass to the template
 	data := map[string]interface{}{
 		"RepoURL":     repoURL,
-		"isGoProject": isGoProject,
+		"IsGoProject": isGoProject,
 	}
 
 	// Create the Jenkinsfile in the current directory
