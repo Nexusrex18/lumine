@@ -1,0 +1,64 @@
+---
+# ── Deployment ────────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lumine-backend
+  labels:
+    app: lumine-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lumine-backend
+  template:
+    metadata:
+      labels:
+        app: lumine-backend
+    spec:
+      containers:
+        - name: lumine-backend
+          image: lumine-backend:latest
+          # imagePullPolicy Must be Never for local Minikube images
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: CORS_ALLOWED_ORIGINS
+              value: "*"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "128Mi"
+---
+# ── Service ───────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: lumine-backend
+spec:
+  type: NodePort
+  selector:
+    app: lumine-backend
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080   # Access via: minikube ip → http://<minikube-ip>:30080

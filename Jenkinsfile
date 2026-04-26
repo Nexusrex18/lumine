@@ -43,45 +43,36 @@ pipeline {
             }
         }
 
-        // ════════════════════════════════════════════════════════════════════
-        //  TODO – Stage 4: Build Docker Image (backend service)
-        //
-        //  Uncomment when ready. Requires:
-        //    • A Dockerfile at backend/Dockerfile
-        //    • Docker daemon accessible by Jenkins agent
-        //    • (Optional) Docker registry credentials stored in Jenkins
-        //
-        // stage('Docker – Build') {
-        //     steps {
-        //         sh 'docker build -t lumine-backend:${GIT_COMMIT[0..6]} ./backend'
-        //     }
-        // }
-        // ════════════════════════════════════════════════════════════════════
+        // ── Stage 4: Build Docker Image ──────────────────────────────────────
+        stage('Docker – Build') {
+            steps {
+                sh '''
+                    # Build inside Minikube's Docker daemon so the image is
+                    # immediately available to the cluster (no registry needed)
+                    eval $(minikube docker-env)
+                    docker build -t lumine-backend:latest ./backend
+                    echo "Image built: lumine-backend:latest"
+                    docker images lumine-backend
+                '''
+            }
+        }
 
-        // ════════════════════════════════════════════════════════════════════
-        //  TODO – Stage 5: Deploy to local Minikube
-        //
-        //  Uncomment when ready. Requires:
-        //    • Minikube running locally: `minikube start`
-        //    • kubectl configured to point at minikube context
-        //    • A k8s manifest at backend/k8s/deployment.yaml
-        //
-        // stage('Minikube – Deploy') {
-        //     steps {
-        //         sh '''
-        //             # Point Docker to Minikube's registry so the image is available inside the cluster
-        //             eval $(minikube docker-env)
-        //             docker build -t lumine-backend:latest ./backend
-        //
-        //             # Apply the deployment manifest
-        //             kubectl apply -f backend/k8s/deployment.yaml
-        //
-        //             # Wait until the pod is Running
-        //             kubectl rollout status deployment/lumine-backend --timeout=120s
-        //         '''
-        //     }
-        // }
-        // ════════════════════════════════════════════════════════════════════
+        // ── Stage 5: Deploy to local Minikube ────────────────────────────────
+        stage('Minikube – Deploy') {
+            steps {
+                sh '''
+                    # Apply (or update) the Deployment + Service
+                    kubectl apply -f backend/k8s/deployment.yaml
+
+                    # Block until the pod is Running (max 2 minutes)
+                    kubectl rollout status deployment/lumine-backend --timeout=120s
+
+                    # Print pod status and the URL to hit the service
+                    kubectl get pods -l app=lumine-backend
+                    echo "Service available at: http://$(minikube ip):30080"
+                '''
+            }
+        }
 
     }
 
