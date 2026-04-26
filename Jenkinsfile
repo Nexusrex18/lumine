@@ -47,12 +47,13 @@ pipeline {
         stage('Docker – Build') {
             steps {
                 sh '''
-                    # 1. Build the image using the host's Docker daemon
-                    docker build -t lumine-backend:latest ./backend
-                    
-                    # 2. Push the image directly into Minikube's internal registry
+                    # Build context = repo root (.) so go.mod + go.sum are visible
+                    # -f points Jenkins at the Dockerfile inside backend/
+                    docker build -t lumine-backend:latest -f ./backend/Dockerfile .
+
+                    # Load the image into Minikube's internal registry
                     minikube image load lumine-backend:latest
-                    
+
                     echo "Image built and loaded into Minikube: lumine-backend:latest"
                 '''
             }
