@@ -47,12 +47,13 @@ pipeline {
         stage('Docker – Build') {
             steps {
                 sh '''
-                    # Build inside Minikube's Docker daemon so the image is
-                    # immediately available to the cluster (no registry needed)
-                    eval $(minikube docker-env)
+                    # 1. Build the image using the host's Docker daemon
                     docker build -t lumine-backend:latest ./backend
-                    echo "Image built: lumine-backend:latest"
-                    docker images lumine-backend
+                    
+                    # 2. Push the image directly into Minikube's internal registry
+                    minikube image load lumine-backend:latest
+                    
+                    echo "Image built and loaded into Minikube: lumine-backend:latest"
                 '''
             }
         }
