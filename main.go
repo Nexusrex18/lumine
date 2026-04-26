@@ -135,7 +135,7 @@ func main() {
 			}
 
 			// Generate the Dockerfile in the specified directory
-			err = docker.GenerateGoDockerfile(rootDir)
+			err = docker.GenerateDockerfile(rootDir)
 			if err != nil {
 				fmt.Printf("Failed to generate Dockerfile: %v\n", err)
 			} else {
