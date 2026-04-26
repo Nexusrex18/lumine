@@ -8,7 +8,7 @@ pipeline {
 
     tools {
         // Must match the name in: Manage Jenkins → Tools → Go installations
-        go 'Go 1.23'
+        go 'Go'
     }
 
     environment {
