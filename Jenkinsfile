@@ -49,7 +49,6 @@ pipeline {
                 sh '''
                     # Point Docker to Minikube's internal daemon — builds the image
                     # directly inside the cluster, no image load/cache step needed
-                    eval $(minikube docker-env)
                     docker build -t lumine-backend:latest -f ./backend/Dockerfile .
                     echo "Image built directly into Minikube daemon: lumine-backend:latest"
                 '''
