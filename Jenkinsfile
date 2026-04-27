@@ -56,23 +56,6 @@ pipeline {
             }
         }
 
-        // ── Stage 5: Deploy to local Minikube ────────────────────────────────
-        stage('Minikube – Deploy') {
-            steps {
-                sh '''
-                    # Apply (or update) the Deployment + Service
-                    kubectl apply -f backend/k8s/deployment.yaml
-
-                    # Block until the pod is Running (max 2 minutes)
-                    kubectl rollout status deployment/lumine-backend --timeout=120s
-
-                    # Print pod status and the URL to hit the service
-                    kubectl get pods -l app=lumine-backend
-                    echo "Service available at: http://$(minikube ip):30080"
-                '''
-            }
-        }
-
     }
 
     post {
